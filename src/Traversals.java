@@ -57,11 +57,11 @@ public class Traversals {
       return "";
     StringBuilder result = new StringBuilder();
 
-    // recurse the left and right subtrees
+    //recurse the left and right subtrees
     result.append(buildPostOrderString(node.left));
     result.append(buildPostOrderString(node.right));
 
-    // Append the current node's value
+    //append the current node's value
     result.append(node.value);
 
     return result.toString();
@@ -82,7 +82,7 @@ public class Traversals {
     if (node == null)
       return list;
 
-    // queue is best for level order traversal
+    //queue is best for level order traversal
     Queue<TreeNode<T>> queue = new LinkedList<>();
     queue.add(node);
 
@@ -110,7 +110,25 @@ public class Traversals {
    * @return the number of unique values in the tree, or 0 if the tree is null
    */
   public static int countDistinctValues(TreeNode<Integer> node) {
-    return 0;
+    if (node == null)
+      return 0;
+    Set<Integer> uniques = new HashSet<>();
+
+    Queue<TreeNode<Integer>> queue = new LinkedList<>();
+    queue.add(node);
+
+    while (!queue.isEmpty()) {
+      TreeNode<Integer> current = queue.poll();
+      //add values to HashSet (sets will only hold unique values)
+      uniques.add(current.value);
+
+      if (current.left != null)
+        queue.add(current.left);
+      if (current.right != null)
+        queue.add(current.right);
+    }
+
+    return uniques.size();
   }
 
   /**
@@ -124,6 +142,26 @@ public class Traversals {
    *         otherwise
    */
   public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) {
+    if (node == null)
+      return false;
+
+    //if it's a leaf node, return true (it's a valid path)
+    if (node.left == null && node.right == null)
+      return true;
+
+    //recurse left subtree (if left child has greater value)
+    if (node.left != null && node.left.value > node.value) {
+      if (hasStrictlyIncreasingPath(node.left))
+        return true;
+    }
+
+    //recurse right subtree (if right child has greater value)
+    if (node.right != null && node.right.value > node.value) {
+      if (hasStrictlyIncreasingPath(node.right))
+        return true;
+    }
+
+    //if no increasing path found, return false
     return false;
   }
 
@@ -141,7 +179,16 @@ public class Traversals {
    * @return true if the trees have the same shape, false otherwise
    */
   public static <T> boolean haveSameShape(TreeNode<T> nodeA, TreeNode<T> nodeB) {
-    return false;
+    //base case 1: Both nodes are null → trees are identical in shape
+    if (nodeA == null && nodeB == null)
+      return true;
+
+    //base Case 2: One is null but the other isn't → different shapes
+    if (nodeA == null || nodeB == null)
+      return false;
+
+    //recurse: Check left and right subtrees
+    return haveSameShape(nodeA.left, nodeB.left) && haveSameShape(nodeA.right, nodeB.right);
   }
 
   // OPTIONAL CHALLENGE
@@ -174,6 +221,32 @@ public class Traversals {
    *         in pre-order
    */
   public static <T> List<List<T>> findAllRootToLeafPaths(TreeNode<T> node) {
-    return null;
+    List<List<T>> result = new ArrayList<>();
+    if (node == null)
+      return result;
+
+    // start recursion with empty path
+    findPaths(node, new ArrayList<>(), result);
+    return result;
+  }
+
+  private static <T> void findPaths(TreeNode<T> node, List<T> currentPath, List<List<T>> result) {
+    if (node == null)
+      return;
+
+    // add current node to path
+    currentPath.add(node.value);
+
+    // if it's leaf node save the path
+    if (node.left == null && node.right == null) {
+      result.add(new ArrayList<>(currentPath));
+    } else {
+      // recurse left and right subtrees
+      findPaths(node.left, currentPath, result);
+      findPaths(node.right, currentPath, result);
+    }
+
+    // remove last node before returning
+    currentPath.remove(currentPath.size() - 1);
   }
 }
